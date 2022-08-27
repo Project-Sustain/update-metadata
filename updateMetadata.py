@@ -50,7 +50,8 @@ def build_field_metadata(collection):
     index = 0
 
     for field in all_keys:
-        if field == '_id' or field == 'GISJOIN':
+        # This is a hard-coded list of values we KNOW we want to exclude from metadata, for all or for specific collections
+        if field == '_id' or field == 'GISJOIN' or field == 'MonitoringLocationIdentifier' or field == 'GridCode':
             index += 1
         else:
             try:
