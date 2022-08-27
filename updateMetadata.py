@@ -24,6 +24,8 @@ def main(collection_name):
     update_metadata_collection(collection_name, field_metadata, metadata)
     print('Complete')
 
+    build_aperture_metadata(field_metadata)
+
     output_file.close()
 
 
@@ -108,6 +110,31 @@ def find_min_max(collection, field):
     return min, max
 
 
+'''
+NOTE this will only generate basic menumetadata. You may need to update this output file
+if some of your entries are temporal, need labels, should be hidden by default, etc...
+'''
+def build_aperture_metadata(field_metadata):
+    aperture_field_metadata = []
+    for index, datum in enumerate(field_metadata):
+        hide_by_default = False if index <= 5 else True
+        if datum['name'] == 'epoch_time':
+            entry = {
+                'name': 'epoch_time',
+                'label': 'Date',
+                'type': 'date',
+                'step': 'day'
+            }
+        else:
+            entry = {
+                'name': datum['name'],
+                'hideByDefault': hide_by_default
+            }
+        aperture_field_metadata.append(entry)
+    with open('aperture_menumetadata.json', 'w') as f:
+        f.write(json.dumps(aperture_field_metadata, indent=4))
+
+
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print(f'Invalid Usage: python3 updateMetadata.py <collection_name>')
@@ -116,17 +143,3 @@ if __name__ == '__main__':
         collection_name = sys.argv[1]
         main(collection_name)
 
-
-
-'''
-
-db.createCollection('testing_metadata_script')
-db.testing_metadata_script.insert([{'test': 0, 'testStr': 'potato', 'epoch_time': 1656968989000}, {'test': 1, 'testSingle': 11, 'testStr': 'juno', 'epoch_time': 1656963989000}, {'test2': 17, 'testStr': 'daisyPants', 'epoch_time': 1156968989000}, {'test2': 7, 'testSingle': 11, 'testStr': 'daisyPants', 'epoch_time': 1156968989000}])
-db.testing_metadata_script.find()
-
-python3 updateMetadata.py testing_metadata_script
-
-db.Metadata.find({'collection': 'testing_metadata_script'}).pretty()
-db.testing_metadata_script.drop()
-
-'''
